@@ -1,0 +1,21 @@
+<!-- Alumni Networking Modal Partial -->
+<!-- Include the CSS and JS: -->
+<!-- <link rel="stylesheet" href="/frontend/alumni_search.css"> -->
+<!-- <script type="module" src="/frontend/alumni_search.js"></script> -->
+
+<div id="alumni-modal" class="alumni-search-modal">
+    <div class="alumni-search" role="dialog" aria-modal="true" aria-label="Alumni Networking">
+        <div class="search-row">
+            <input id="alumni-search-input" type="search" placeholder="Search by company or name (e.g. Google)" aria-label="Search alumni" />
+            <div id="alumni-search-status" aria-live="polite"></div>
+        </div>
+
+        <div id="alumni-results" class="alumni-results" aria-live="polite"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { initAlumniSearch } from '/frontend/alumni_search.js';
+    // Auto-init the modal area on load
+    window.addEventListener('DOMContentLoaded', () => initAlumniSearch('#alumni-modal'));
+</script>
