@@ -914,94 +914,6 @@ const ProjectSearchWidget = ({ defaultQuery }: { defaultQuery?: string }) => {
     );
 };
 
-const HomePage = ({ data, onOpenPublicModal }: { data: AppData, onOpenPublicModal?: (name: string) => void }) => {
-    // Replaced useLiveNews with PublicJobSearch for Public tab
-    const [homeTab, setHomeTab] = useState<'PUBLIC' | 'MINE'>('PUBLIC');
-    const [mineSubTab, setMineSubTab] = useState<'news' | 'projects'>('news');
-
-    // Mock data for mine section (kept for fallback)
-    const personalNews = [
-        { title: 'Application Update: Dr. Grant', detail: 'Pending review' },
-        { title: 'New Message from Career Center', detail: 'Workshop invite' }
-    ];
-    const projectIdeas = [
-        { title: 'AI in Healthcare', detail: 'Collaborate with Bio Dept' },
-        { title: 'Sustainable Energy Grid', detail: 'Review physics notes' }
-    ];
-
-    return (
-        <div className="homepage-container">
-            <div className="homepage-tabs">
-                <button className={`home-tab ${homeTab === 'PUBLIC' ? 'active' : ''}`} onClick={() => setHomeTab('PUBLIC')}>PUBLIC</button>
-                <button className={`home-tab ${homeTab === 'MINE' ? 'active' : ''}`} onClick={() => setHomeTab('MINE')}>MINE</button>
-            </div>
-            {homeTab === 'PUBLIC' ? (
-                // PUBLIC preview: show stacked ANNOUNCEMENTS and NEWS with a 2-item preview
-                <div style={{display:'flex', flexDirection:'column', gap:'1rem'}}>
-                    <div className="public-section-card" style={{padding:'1rem', borderRadius:8, boxShadow:'0 2px 8px rgba(0,0,0,0.06)', background:'white'}}>
-                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                            <div>
-                                <h3 style={{margin:0}}>ANNOUNCEMENTS</h3>
-                                <p style={{margin:0, color:'#666', fontSize:'0.9rem'}}>Latest job announcements across companies</p>
-                            </div>
-                            <div style={{display:'flex', gap:8}}>
-                                <button className="add-btn" onClick={() => onOpenPublicModal && onOpenPublicModal('announcements')}>Open</button>
-                            </div>
-                        </div>
-                        <div style={{marginTop:'0.75rem'}}>
-                            <PublicJobSearch mode="preview" previewCount={2} />
-                        </div>
-                    </div>
-
-                    <div className="public-section-card" style={{padding:'1rem', borderRadius:8, boxShadow:'0 2px 8px rgba(0,0,0,0.06)', background:'white'}}>
-                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                            <div>
-                                <h3 style={{margin:0}}>NEWS</h3>
-                                <p style={{margin:0, color:'#666', fontSize:'0.9rem'}}>Technology news and updates</p>
-                            </div>
-                            <div style={{display:'flex', gap:8}}>
-                                <button className="add-btn" onClick={() => onOpenPublicModal && onOpenPublicModal('news')}>Open</button>
-                            </div>
-                        </div>
-                        <div style={{marginTop:'0.75rem'}}>
-                            {/* show a small news preview using the same component in preview mode (it will run a news query) */}
-                            <PublicJobSearch mode="preview" previewCount={2} queryTarget={'news'} />
-                        </div>
-                    </div>
-                </div>
-            ) : (
-                <div className="mine-dashboard-wrapper">
-                    <div className="mine-nav-container">
-                        <button
-                            className={`mine-nav-tab ${mineSubTab === 'news' ? 'active' : ''}`}
-                            onClick={() => setMineSubTab('news')}
-                        >
-                            News
-                        </button>
-                        <button
-                            className={`mine-nav-tab ${mineSubTab === 'projects' ? 'active' : ''}`}
-                            onClick={() => setMineSubTab('projects')}
-                        >
-                            Projects
-                        </button>
-                    </div>
-
-                    <div className="mine-content-feed">
-                        {mineSubTab === 'news' ? (
-                            // Render CompanyNewsWidget which allows entering a company name and fetching
-                            // official news using Google Custom Search API restricted to authoritative domains.
-                            <CompanyNewsWidget />
-                        ) : (
-                            // Render ProjectSearchWidget for finding GitHub projects/contributors for ideas
-                            <ProjectSearchWidget />
-                        )}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
-
 // 7. Professor List Item (new horizontal layout used in Directory)
 const ProfessorListItem = ({ professor, onNavigate, onEdit, onRemove }: any) => {
     const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -1935,7 +1847,7 @@ const CertificatesModal = ({ onClose }: { onClose: () => void }) => {
                                         </div>
                                         <h3 className="cert-card-title">{cert.name}</h3>
                                         <div className="cert-card-footer">
-                                            <span className="open-icon">Visit Course ↗</span>
+                                            <span className="open-icon">Watch Videos ↗</span>
                                         </div>
                                     </a>
                                 ))}
@@ -2128,7 +2040,7 @@ const PDFViewer = ({ code }: { code: string }) => {
             // Support two common layouts:
             // 1) per-code folders: /syllabus/AE/AE_2026_Syllabus.pdf
             // 2) single syllabus folder with files named by code: /syllabus/AE_2026_Syllabus.pdf
-            const backend = import.meta.env.VITE_BACKEND_URL || 'https://lol-j8ni.onrender.com';
+            const backend = 'https://lol-j8ni.onrender.com';
             const candidates = [
                 // single-folder filenames (served from backend)
                 `${backend}/syllabus/${code}_2026_Syllabus.pdf`,
@@ -2196,7 +2108,7 @@ const PDFViewer = ({ code }: { code: string }) => {
                 <li><code>public/syllabus/{code}_2026_Syllabus.pdf</code> (single syllabus folder)</li>
                 <li>If you serve static files from the project root, you can also place files at <code>./syllabus/{code}_2026_Syllabus.pdf</code></li>
             </ul>
-            <p>If you already placed the file, ensure your dev/build server serves files from the <code>/syllabus</code> path. You can also <a href={`/syllabus/${code}/`} target="_blank" rel="noopener noreferrer">open the folder URL</a> to inspect files (if directory listing is enabled).</p>
+            <p>If you already placed the file, ensure your dev/build server serves files from the <code>/syllabus</code> path. You can also <a href={`https://lol-j8ni.onrender.com/syllabus/${code}/`} target="_blank" rel="noopener noreferrer">open the folder URL</a> to inspect files (if directory listing is enabled).</p>
         </div>
     );
 };
@@ -2634,6 +2546,62 @@ const QuizzesModal = ({ onClose }: { onClose: () => void }) => {
                         )
                     )}
                 </div>
+            </div>
+        </div>
+    );
+};
+
+// --- HOME PAGE ---
+const HomePage = ({ data, onOpenPublicModal }: { data: AppData; onOpenPublicModal: (name: string) => void }) => {
+    return (
+        <div className="home-page-container">
+            <div className="home-hero">
+                <h1>Welcome to Career Booster</h1>
+                <p>Explore professors, departments, and resources to accelerate your career.</p>
+            </div>
+
+            <div className="home-sections">
+                <section className="home-section">
+                    <h2>Featured Resources</h2>
+                    <div className="home-resources-grid">
+                        <div className="home-resource-card" onClick={() => onOpenPublicModal('announcements')}>
+                            <h3>Job Announcements</h3>
+                            <p>Find latest job openings and career opportunities</p>
+                        </div>
+                        <div className="home-resource-card" onClick={() => onOpenPublicModal('news')}>
+                            <h3>Technology News</h3>
+                            <p>Stay updated with the latest tech news</p>
+                        </div>
+                        <div className="home-resource-card" onClick={() => onOpenPublicModal('certificates')}>
+                            <h3>Free Certifications</h3>
+                            <p>Access 100+ free certification programs</p>
+                        </div>
+                        <div className="home-resource-card" onClick={() => onOpenPublicModal('quizzes')}>
+                            <h3>Exams & Quizzes</h3>
+                            <p>Prepare for GATE, interviews, and more</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="home-section">
+                    <h2>Browse by Department</h2>
+                    <div className="home-departments-list">
+                        {data.departments.slice(0, 5).map(dept => (
+                            <div key={dept.id} className="home-dept-item">
+                                <h3>{dept.name}</h3>
+                                <p>{dept.branches.length} branches</p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                <section className="home-section">
+                    <CompanyNewsWidget defaultCompany="Google" />
+                </section>
+
+                <section className="home-section">
+                    <ProjectSearchWidget defaultQuery="machine learning" />
+                </section>
             </div>
         </div>
     );
@@ -3139,3 +3107,13 @@ root.render(
         </ToastProvider>
     </React.StrictMode>
 );
+
+// Example anchor tag for PDF link
+const BACKEND_URL = 'https://lol-j8ni.onrender.com'; // Backend global URL
+<a
+    href={`${BACKEND_URL}/syllabus/AE_2025_Syllabus.pdf`}
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  View AE 2025 Syllabus PDF
+</a>
