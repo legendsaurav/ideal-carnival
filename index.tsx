@@ -2040,7 +2040,7 @@ const PDFViewer = ({ code }: { code: string }) => {
             // Support two common layouts:
             // 1) per-code folders: /syllabus/AE/AE_2026_Syllabus.pdf
             // 2) single syllabus folder with files named by code: /syllabus/AE_2026_Syllabus.pdf
-            const backend = 'https://lol-j8ni.onrender.com';
+            const backend = import.meta.env.VITE_BACKEND_URL || 'https://lol-j8ni.onrender.com';
             const candidates = [
                 // single-folder filenames (served from backend)
                 `${backend}/syllabus/${code}_2026_Syllabus.pdf`,
@@ -2108,7 +2108,7 @@ const PDFViewer = ({ code }: { code: string }) => {
                 <li><code>public/syllabus/{code}_2026_Syllabus.pdf</code> (single syllabus folder)</li>
                 <li>If you serve static files from the project root, you can also place files at <code>./syllabus/{code}_2026_Syllabus.pdf</code></li>
             </ul>
-            <p>If you already placed the file, ensure your dev/build server serves files from the <code>/syllabus</code> path. You can also <a href={`https://lol-j8ni.onrender.com/syllabus/${code}/`} target="_blank" rel="noopener noreferrer">open the folder URL</a> to inspect files (if directory listing is enabled).</p>
+            <p>If you already placed the file, ensure your dev/build server serves files from the <code>/syllabus</code> path. You can also <a href={`/syllabus/${code}/`} target="_blank" rel="noopener noreferrer">open the folder URL</a> to inspect files (if directory listing is enabled).</p>
         </div>
     );
 };
@@ -2546,62 +2546,6 @@ const QuizzesModal = ({ onClose }: { onClose: () => void }) => {
                         )
                     )}
                 </div>
-            </div>
-        </div>
-    );
-};
-
-// --- HOME PAGE ---
-const HomePage = ({ data, onOpenPublicModal }: { data: AppData; onOpenPublicModal: (name: string) => void }) => {
-    return (
-        <div className="home-page-container">
-            <div className="home-hero">
-                <h1>Welcome to Career Booster</h1>
-                <p>Explore professors, departments, and resources to accelerate your career.</p>
-            </div>
-
-            <div className="home-sections">
-                <section className="home-section">
-                    <h2>Featured Resources</h2>
-                    <div className="home-resources-grid">
-                        <div className="home-resource-card" onClick={() => onOpenPublicModal('announcements')}>
-                            <h3>Job Announcements</h3>
-                            <p>Find latest job openings and career opportunities</p>
-                        </div>
-                        <div className="home-resource-card" onClick={() => onOpenPublicModal('news')}>
-                            <h3>Technology News</h3>
-                            <p>Stay updated with the latest tech news</p>
-                        </div>
-                        <div className="home-resource-card" onClick={() => onOpenPublicModal('certificates')}>
-                            <h3>Free Certifications</h3>
-                            <p>Access 100+ free certification programs</p>
-                        </div>
-                        <div className="home-resource-card" onClick={() => onOpenPublicModal('quizzes')}>
-                            <h3>Exams & Quizzes</h3>
-                            <p>Prepare for GATE, interviews, and more</p>
-                        </div>
-                    </div>
-                </section>
-
-                <section className="home-section">
-                    <h2>Browse by Department</h2>
-                    <div className="home-departments-list">
-                        {data.departments.slice(0, 5).map(dept => (
-                            <div key={dept.id} className="home-dept-item">
-                                <h3>{dept.name}</h3>
-                                <p>{dept.branches.length} branches</p>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-
-                <section className="home-section">
-                    <CompanyNewsWidget defaultCompany="Google" />
-                </section>
-
-                <section className="home-section">
-                    <ProjectSearchWidget defaultQuery="machine learning" />
-                </section>
             </div>
         </div>
     );
@@ -3109,9 +3053,8 @@ root.render(
 );
 
 // Example anchor tag for PDF link
-const BACKEND_URL = 'https://lol-j8ni.onrender.com'; // Backend global URL
 <a
-    href={`${BACKEND_URL}/syllabus/AE_2025_Syllabus.pdf`}
+  href={`${import.meta.env.VITE_BACKEND_URL}/syllabus/AE_2025_Syllabus.pdf`}
   target="_blank"
   rel="noopener noreferrer"
 >
