@@ -868,6 +868,9 @@ const ProjectSearchWidget = ({ defaultQuery }: { defaultQuery?: string }) => {
     };
 
     const handleSubmit = (e?: React.FormEvent) => {
+
+
+
         e?.preventDefault();
         if (!query.trim()) return setError('Enter a project idea');
         performSearch(query.trim());
@@ -889,7 +892,7 @@ const ProjectSearchWidget = ({ defaultQuery }: { defaultQuery?: string }) => {
 
             <div className="github-user-cards">
                 {Object.keys(users).length === 0 && !loading && <div style={{color:'#666'}}>No users found yet. Try a broader query.</div>}
-                {Object.entries(users).map(([user, data]) => (
+                {Object.entries(users).map(([user, data]: [string, { avatar?: string; profile?: string; bio?: string; repos: { name: string; url: string; snippet?: string }[] }]) => (
                     <div key={user} className="github-user-card">
                         <div className="github-user-avatar"><img src={data.avatar} alt={user} style={{width:'100%', height:'100%', objectFit:'cover'}}/></div>
                         <div className="github-user-meta">
