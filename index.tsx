@@ -2128,19 +2128,20 @@ const PDFViewer = ({ code }: { code: string }) => {
             // Support two common layouts:
             // 1) per-code folders: /syllabus/AE/AE_2026_Syllabus.pdf
             // 2) single syllabus folder with files named by code: /syllabus/AE_2026_Syllabus.pdf
+            const backend = import.meta.env.VITE_BACKEND_URL || 'https://lol-j8ni.onrender.com';
             const candidates = [
-                // single-folder filenames (project-root or public/syllabus)
-                `${window.location.origin}/syllabus/${code}_2026_Syllabus.pdf`,
-                `${window.location.origin}/syllabus/${code}_2025_Syllabus.pdf`,
-                `${window.location.origin}/syllabus/${code}_Syllabus.pdf`,
-                `${window.location.origin}/syllabus/${code}.pdf`,
-                `${window.location.origin}/syllabus/${code}_2026.pdf`,
+                // single-folder filenames (served from backend)
+                `${backend}/syllabus/${code}_2026_Syllabus.pdf`,
+                `${backend}/syllabus/${code}_2025_Syllabus.pdf`,
+                `${backend}/syllabus/${code}_Syllabus.pdf`,
+                `${backend}/syllabus/${code}.pdf`,
+                `${backend}/syllabus/${code}_2026.pdf`,
                 // per-code folder layout
-                `${window.location.origin}/syllabus/${code}/${code}_2026_Syllabus.pdf`,
-                `${window.location.origin}/syllabus/${code}/${code}_2025_Syllabus.pdf`,
-                `${window.location.origin}/syllabus/${code}/${code}_Syllabus.pdf`,
-                `${window.location.origin}/syllabus/${code}/${code}.pdf`,
-                `${window.location.origin}/syllabus/${code}/${code}_2026.pdf`
+                `${backend}/syllabus/${code}/${code}_2026_Syllabus.pdf`,
+                `${backend}/syllabus/${code}/${code}_2025_Syllabus.pdf`,
+                `${backend}/syllabus/${code}/${code}_Syllabus.pdf`,
+                `${backend}/syllabus/${code}/${code}.pdf`,
+                `${backend}/syllabus/${code}/${code}_2026.pdf`
             ];
 
             for (const url of candidates) {
@@ -2841,10 +2842,11 @@ const App = () => {
         try {
             // Try fetching from server
             const serverData: any = await fetchMockData();
-            if (serverData && serverData.departments) {
+            if (serverData && serverData.departments && Array.isArray(serverData.departments) && serverData.departments.length > 0) {
                 loadedData = serverData;
                 setApiStatus('connected');
             } else {
+                setApiStatus('offline');
                 throw new Error('Invalid server data');
             }
         } catch (error) {
