@@ -67,7 +67,7 @@ export function initAlumniSearch(rootSelector) {
         setStatus('Searching...');
         resultsContainer.innerHTML = '';
         try {
-            const res = await fetch('/api/alumni_search', {
+            const res = await fetch('https://lol-j8ni.onrender.com/api/alumni_search', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query: q, max: 10 })
             });

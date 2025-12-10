@@ -9,26 +9,8 @@ import { apiLogger } from './apilogger';
 // With the Vite proxy, we no longer need the absolute path.
 // The browser makes requests to the same origin, and Vite forwards them.
 export const getApiBaseUrl = () => {
-    // Prefer an explicit Vite env var when available (set VITE_BACKEND_URL)
-    // otherwise, during local development assume the backend runs on port 4000.
-    // In production, an empty string lets the browser use the same origin.
-    try {
-        // Vite exposes env vars on `import.meta.env` with the VITE_ prefix.
-        // Use any value provided there first.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const maybe = (import.meta as any)?.env?.VITE_BACKEND_URL;
-        if (maybe) return maybe;
-    } catch (e) {}
-
-    if (typeof window !== 'undefined') {
-        // If running on localhost (dev), point to the backend default port.
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            return 'http://localhost:4000';
-        }
-    }
-
-    // Production: use same origin
-    return '';
+    // Always use the deployed backend server
+    return 'https://lol-j8ni.onrender.com';
 };
 
 
