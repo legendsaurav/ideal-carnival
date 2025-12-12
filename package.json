@@ -8,6 +8,7 @@
     "start": "node server.js",
     "add-profs": "node scripts/add_professors.cjs",
     "build": "vite build",
+    "vercel-build": "vite build",
     "preview": "vite preview"
   },
   "author": "",
