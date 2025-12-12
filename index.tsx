@@ -1,3 +1,16 @@
+// Fix for Vite env typing
+interface ImportMeta {
+    readonly env: {
+        VITE_BACKEND_URL: string;
+    };
+}
+// Minimal HomePage component to fix build error
+const HomePage = ({ data, onOpenPublicModal }: { data: any, onOpenPublicModal: (name: string) => void }) => (
+    <div>
+        <h1>Home</h1>
+        {/* Add your homepage UI here */}
+    </div>
+);
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -3051,12 +3064,3 @@ root.render(
         </ToastProvider>
     </React.StrictMode>
 );
-
-// Example anchor tag for PDF link
-<a
-  href={`${import.meta.env.VITE_BACKEND_URL}/syllabus/AE_2025_Syllabus.pdf`}
-  target="_blank"
-  rel="noopener noreferrer"
->
-  View AE 2025 Syllabus PDF
-</a>
