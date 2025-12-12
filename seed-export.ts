@@ -57,7 +57,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "Fundamental limits of cryptographic primitives over unreliable Gaussian noisy channels, information theory, distributed sampling, coding theory, and secure multi-party computation.",
-            photo: "/ece/download(1).png",
+            photo: "/ece/download (1).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-amitalok",
                 awards: "",
@@ -85,7 +85,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "Photonic wire waveguides, 2D materials, solar cells, neuromorphic devices, bio nano photonics, photonic instrumentation and imaging, metamaterials, biophotonics, and nanofabrication for biomedical sensor design.",
-            photo: "/ece/download(2).png",
+            photo: "/ece/download (2).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-blahiri",
                 awards: "",
@@ -116,7 +116,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "Full-wave analysis and design of efficient antennas, guided systems, antenna miniaturization, numerical electromagnetics, dielectric resonator antennas, and slot antenna technologies.",
-            photo: "/ece/download(3).png",
+            photo: "/ece/download (3).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-bghosh",
                 awards: "",
@@ -144,7 +144,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "Deep learning-based 3D digital restoration, hyperspectral image quality improvement, artificial visual scanpath generation for action recognition, robotic systems for hazardous manufacturing, and multi-sensor integration. Heavy focus on deep learning, image analysis, and advanced manufacturing.",
-            photo: "/ece/download(4).png",
+            photo: "/ece/download (4).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-dsen",
                 awards: "",
@@ -172,7 +172,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "Biomedical signal processing, speech/audio signal processing, pattern recognition, biometric authentication, healthcare technologies, and related machine learning.",
-            photo: "/ece/download(5).png",
+            photo: "/ece/download (5).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-gsaha",
                 awards: "",
@@ -200,7 +200,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "Hardware security in networking, low-power VLSI design, radio frequency ICs, mixed signal/RF IC design, modem design, wireless communication, VLSI architectures for image/video processing, and analog spiking neural network applications to low-power computing.",
-            photo: "/ece/download(6).png",
+            photo: "/ece/download (6).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-indrajit",
                 awards: "",
@@ -229,7 +229,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "Information theory, wireless communication, privacy in coded caching and function computation, secure function computation, scaling laws for many-access channels, and network coding.",
-            photo: "/ece/download(7).png",
+            photo: "/ece/download (7).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-jithin",
                 awards: "",
@@ -257,7 +257,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "Microwave and millimeter-wave circuits, antenna design, filters (low-pass, band-pass, stop-band), SIW power dividers, reconfigurable antennas, and planar circuit technologies.",
-            photo: "/ece/download(8).png",
+            photo: "/ece/download (8).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-mkmandal",
                 awards: "",
@@ -286,7 +286,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "Digital and adaptive signal processing, VLSI signal processing, compressive sensing, sparse system identification, cooperative adaptive estimation algorithms, radar pulse parameter estimation.",
-            photo: "/ece/download(9).png",
+            photo: "/ece/download (9).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-mrityun",
                 awards: "",
@@ -314,7 +314,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "Nanomaterial-based sensors/devices, flexible microdevices, energy devices, biomedical sensors, photonic sensors, VLSI design, chemiresistive gas sensors, supercapacitor nano devices, and energy storage.",
-            photo: "/ece/download(10).png",
+            photo: "/ece/download (10).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-pkguha",
                 awards: "",
@@ -344,7 +344,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "Software-defined networks, edge computing, inter-planetary networks, elastic optical networks, vehicular ad hoc networks, mobile ad hoc network security, routing, and IoT-enabled sensor techniques.",
-            photo: "/ece/download(11).png",
+            photo: "/ece/download (11).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-rajadatta",
                 awards: "",
@@ -373,7 +373,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "Optical physics and communication engineering at the electromagnetic wave-matter interface, developing next-gen communication technologies, optically reconfigured microstrip circuits/devices, photonics, and reconfigurable microwave devices.",
-            photo: "/ece/download(12).png",
+            photo: "/ece/download (12).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-sarang",
                 awards: "",
@@ -401,7 +401,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "Quantum optics, micromachines, energy harvesting functional materials, integrated photonics, nanorobotics, fiber optic sensors, metamaterials, perovskite solar cells, underwater optical wireless comm., experimental photonics, 4D printing, micro manufacturing.",
-            photo: "/ece/download(13).png",
+            photo: "/ece/download (13).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-skvarshney",
                 awards: "",
@@ -432,7 +432,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "Neurobiology, auditory neuroscience, auditory neural processing, cognitive neuroscience, neurophysiology, affective neuroscience. Focus on physiological/cognitive data analysis and neural plasticity in auditory systems.",
-            photo: "/ece/download(14).png",
+            photo: "/ece/download (14).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-sharba",
                 awards: "",
@@ -460,7 +460,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "Deep learning for inverse problems in medical imaging (CT, low-dose/sparse projections), data-driven image reconstruction, optimization and statistics for clinical applications, integration of machine learning with regularization theory, and robust algorithms for high-dimensional signal estimation.",
-            photo: "/ece/download(15).png",
+            photo: "/ece/download (15).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-smukherjee",
                 awards: "",
@@ -488,7 +488,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "Medical image processing, video restoration, image quality metrics, content-based image retrieval (especially for CT/lung images), autonomous tools for radiologists, feature extraction for image retrieval, video coding, and medical imaging algorithms.",
-            photo: "/ece/download(16).png",
+            photo: "/ece/download (16).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-smukho",
                 awards: "",
@@ -516,7 +516,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "MEMS/microsystems, RF/analog VLSI, nanoelectronics, nano-bio sensors, energy storage/harvesting, thin films, biosystem engineering, sensors/actuators for aerospace; leads multidisciplinary labs for VLSI, high-performance devices, and nano-bio applications.",
-            photo: "/ece/download(17).png",
+            photo: "/ece/download (17).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-tkb",
                 awards: "",
@@ -545,7 +545,7 @@ export const fallbackData = {
             branch: "branch_ece",
             departmentId: "dept_ece",
             description: "Semiconductor devices modeling/simulation, silicon photonics, THz technology, metamaterials, photonic devices, low-loss silicon modulators, reconfigurable microwave/photonics structures, and eye diagram simulation for electro-optic signals.",
-            photo: "/ece/download(18).png",
+            photo: "/ece/download (18).png",
             links: {
                 webpage: "https://www.iitkgp.ac.in/department/EC/faculty/ec-vdixit",
                 awards: "",
