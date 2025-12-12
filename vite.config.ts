@@ -12,7 +12,7 @@ declare const process: any;
 // the frontend itself (causing self-proxy loops and 5xx errors).
 // Use BACKEND_PORT or BACKEND_URL to explicitly point to the backend.
 const backendPort = process.env.BACKEND_PORT || '4000';
-const backendHost = process.env.BACKEND_URL || `http://localhost:${backendPort}`;
+const backendHost = process.env.BACKEND_URL || 'https://lol-j8ni.onrender.com';
 
 export default defineConfig({
   plugins: [react()],

@@ -239,9 +239,16 @@ const LoginPage = ({ onLogin, onPublicLogin, theme, onToggleTheme }: { onLogin: 
     const [adminPassword, setAdminPassword] = useState('');
     const [guestName, setGuestName] = useState('');
     const [guestEmail, setGuestEmail] = useState('');
-    const [guestPassword, setGuestPassword] = useState('12345');
+    const [guestPassword, setGuestPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const allowedGuests = [
+        { name: "Mohi Modi", first: "Mohi" },
+        { name: "Harsh Yadav", first: "Harsh" },
+        { name: "Ankit Mittal", first: "Ankit" },
+        { name: "Saurav Saha", first: "Saurav" }
+    ];
 
     const handleAdminSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -254,13 +261,30 @@ const LoginPage = ({ onLogin, onPublicLogin, theme, onToggleTheme }: { onLogin: 
         e.preventDefault();
         setError('');
         if (!guestName.trim() || !guestEmail.trim() || !guestPassword.trim()) {
-            setError('Please provide name, email and the shared password.');
+            setError('Please provide name, email and password.');
             return;
         }
+
+        // Validate specific users
+        const inputName = guestName.trim();
+        const foundUser = allowedGuests.find(u => u.name.toLowerCase() === inputName.toLowerCase());
+        
+        if (!foundUser) {
+            setError('User not authorized.');
+            return;
+        }
+
+        // Password policy: FirstName + &123 (e.g. Mohi&123)
+        const expectedPass = `${foundUser.first}&123`;
+        if (guestPassword !== expectedPass) {
+            setError('Invalid password.');
+            return;
+        }
+
         setLoading(true);
         try {
-            const ok = await onPublicLogin(guestName.trim(), guestEmail.trim(), guestPassword);
-            if (!ok) setError('Public login failed. Check the shared password and try again.');
+            const ok = await onPublicLogin(foundUser.name, guestEmail.trim(), guestPassword); // pass foundUser.name to normalize casing
+            if (!ok) setError('Login failed.');
         } catch (err) {
             setError('Public login failed. Check server connection.');
         } finally { setLoading(false); }
@@ -323,7 +347,7 @@ const LoginPage = ({ onLogin, onPublicLogin, theme, onToggleTheme }: { onLogin: 
                             <div className="input-group">
                                 <label>Name</label>
                                 <div className="input-wrapper">
-                                    <input type="text" value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Your name" />
+                                    <input type="text" value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Full Name (e.g. Mohi Modi)" />
                                 </div>
                             </div>
                             <div className="input-group">
@@ -333,9 +357,9 @@ const LoginPage = ({ onLogin, onPublicLogin, theme, onToggleTheme }: { onLogin: 
                                 </div>
                             </div>
                             <div className="input-group">
-                                <label>Shared Password</label>
+                                <label>Password</label>
                                 <div className="input-wrapper">
-                                    <input type="password" value={guestPassword} onChange={(e) => setGuestPassword(e.target.value)} placeholder="shared password" />
+                                    <input type="password" value={guestPassword} onChange={(e) => setGuestPassword(e.target.value)} placeholder="Firstname&123" />
                                 </div>
                             </div>
                             {error && <p className="login-error" style={{color: 'red'}}>{error}</p>}
@@ -889,7 +913,7 @@ const ProjectSearchWidget = ({ defaultQuery }: { defaultQuery?: string }) => {
 
             <div className="github-user-cards">
                 {Object.keys(users).length === 0 && !loading && <div style={{color:'#666'}}>No users found yet. Try a broader query.</div>}
-                {Object.entries(users).map(([user, data]: [string, any]) => (
+                {Object.entries(users).map(([user, data]) => (
                     <div key={user} className="github-user-card">
                         <div className="github-user-avatar"><img src={data.avatar} alt={user} style={{width:'100%', height:'100%', objectFit:'cover'}}/></div>
                         <div className="github-user-meta">
@@ -911,20 +935,10 @@ const ProjectSearchWidget = ({ defaultQuery }: { defaultQuery?: string }) => {
     );
 };
 
-const HomePage = ({ data, onOpenPublicModal }: { data: AppData, onOpenPublicModal?: (name: string) => void }) => {
+const HomePage = ({ data, onOpenPublicModal, userRole, hasGuestTarget }: { data: AppData, onOpenPublicModal?: (name: string) => void, userRole?: string | null, hasGuestTarget?: boolean }) => {
     // Replaced useLiveNews with PublicJobSearch for Public tab
     const [homeTab, setHomeTab] = useState<'PUBLIC' | 'MINE'>('PUBLIC');
     const [mineSubTab, setMineSubTab] = useState<'news' | 'projects'>('news');
-
-    // Mock data for mine section (kept for fallback)
-    const personalNews = [
-        { title: 'Application Update: Dr. Grant', detail: 'Pending review' },
-        { title: 'New Message from Career Center', detail: 'Workshop invite' }
-    ];
-    const projectIdeas = [
-        { title: 'AI in Healthcare', detail: 'Collaborate with Bio Dept' },
-        { title: 'Sustainable Energy Grid', detail: 'Review physics notes' }
-    ];
 
     return (
         <div className="homepage-container">
@@ -968,31 +982,41 @@ const HomePage = ({ data, onOpenPublicModal }: { data: AppData, onOpenPublicModa
                 </div>
             ) : (
                 <div className="mine-dashboard-wrapper">
-                    <div className="mine-nav-container">
-                        <button
-                            className={`mine-nav-tab ${mineSubTab === 'news' ? 'active' : ''}`}
-                            onClick={() => setMineSubTab('news')}
-                        >
-                            News
-                        </button>
-                        <button
-                            className={`mine-nav-tab ${mineSubTab === 'projects' ? 'active' : ''}`}
-                            onClick={() => setMineSubTab('projects')}
-                        >
-                            Projects
-                        </button>
-                    </div>
+                    {userRole === 'public' && !hasGuestTarget ? (
+                        <div style={{textAlign:'center', padding:'3rem', color:'#666'}}>
+                            <div style={{fontSize:'2rem', marginBottom:'1rem'}}>🔒</div>
+                            <h3>Dashboard Locked</h3>
+                            <p style={{maxWidth:'400px', margin:'0 auto'}}>Please visit the <b>Professor Directory</b> and select a target professor to unlock your personal dashboard.</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="mine-nav-container">
+                                <button
+                                    className={`mine-nav-tab ${mineSubTab === 'news' ? 'active' : ''}`}
+                                    onClick={() => setMineSubTab('news')}
+                                >
+                                    News
+                                </button>
+                                <button
+                                    className={`mine-nav-tab ${mineSubTab === 'projects' ? 'active' : ''}`}
+                                    onClick={() => setMineSubTab('projects')}
+                                >
+                                    Projects
+                                </button>
+                            </div>
 
-                    <div className="mine-content-feed">
-                        {mineSubTab === 'news' ? (
-                            // Render CompanyNewsWidget which allows entering a company name and fetching
-                            // official news using Google Custom Search API restricted to authoritative domains.
-                            <CompanyNewsWidget />
-                        ) : (
-                            // Render ProjectSearchWidget for finding GitHub projects/contributors for ideas
-                            <ProjectSearchWidget />
-                        )}
-                    </div>
+                            <div className="mine-content-feed">
+                                {mineSubTab === 'news' ? (
+                                    // Render CompanyNewsWidget which allows entering a company name and fetching
+                                    // official news using Google Custom Search API restricted to authoritative domains.
+                                    <CompanyNewsWidget />
+                                ) : (
+                                    // Render ProjectSearchWidget for finding GitHub projects/contributors for ideas
+                                    <ProjectSearchWidget />
+                                )}
+                            </div>
+                        </>
+                    )}
                 </div>
             )}
         </div>
@@ -1089,12 +1113,30 @@ const ProfessorDirectoryPage = ({ professors, onNavigate, onAdd, userRole, onEdi
 };
 
 // 9. Profile Page
-const ProfessorProfilePage = ({ professor, onEditProfessor, userRole, onSetTarget, onReturnHome }: any) => {
+const ProfessorProfilePage = ({ professor, onEditProfessor, userRole, onSetTarget, onReturnHome, hasGuestTarget, onConfirmGuestTarget }: any) => {
     const [actionModalStep, setActionModalStep] = useState<number>(0);
 
     const openAction = () => {
+        // Guest Restriction Logic
+        if (userRole === 'public') {
+            if (hasGuestTarget) {
+                alert("You have already selected a target professor. You cannot select another.");
+                return;
+            } else {
+                // Show warning before proceeding
+                setActionModalStep(-1); // Special step for warning
+                return;
+            }
+        }
+
+        // Admin or non-restricted flow
         try { if (onSetTarget) onSetTarget(professor.id); } catch (e) {}
         setActionModalStep(1);
+    };
+
+    const confirmGuestTargetSelection = () => {
+        if (onConfirmGuestTarget) onConfirmGuestTarget(professor.id);
+        setActionModalStep(1); // Proceed to normal flow
     };
 
     return (
@@ -1125,6 +1167,29 @@ const ProfessorProfilePage = ({ professor, onEditProfessor, userRole, onSetTarge
                 <h3>Research</h3>
                 <ul>{(Array.isArray(professor.research) ? professor.research : [professor.research]).map((r:string, i:number) => <li key={i}>{r}</li>)}</ul>
             </div>
+
+            {/* Guest Warning Modal */}
+            {actionModalStep === -1 && (
+                <div className="modal-overlay is-visible" role="dialog" aria-modal="true" aria-label="Confirm Target">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h2 className="modal-title" style={{color:'#b91c1c'}}>Important Warning</h2>
+                            <button onClick={() => setActionModalStep(0)} className="close-btn">×</button>
+                        </div>
+                        <div className="modal-body-wrapper">
+                            <div className="modal-body">
+                                <p>You can only select <strong>ONE</strong> professor as your target. This action cannot be undone.</p>
+                                <p>Selecting this professor will unlock your personal "Mine" dashboard.</p>
+                                <p>Do you want to set <strong>{professor.name}</strong> as your target?</p>
+                            </div>
+                        </div>
+                        <div className="modal-actions">
+                            <button className="modal-btn secondary" onClick={() => setActionModalStep(0)}>Cancel</button>
+                            <button className="modal-btn primary" onClick={confirmGuestTargetSelection}>Confirm & Proceed</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ACTION modal flow: 3-step dialog */}
             {actionModalStep === 1 && (
@@ -2212,108 +2277,110 @@ const selectedGateBranchName = (code: string) => {
 // GATE LECTURE RESOURCES
 const GATE_LECTURES: Record<string, Array<{ name: string; desc: string; link: string }>> = {
     AE: [
-        { name: "GATE Aerospace – IGC", desc: "Crash courses, aerodynamics, paper discussions", link: "https://www.youtube.com/results?search_query=GATE+Aerospace+IGC" },
-        { name: "Goodwill Gate2IIT", desc: "Full AE lecture series, aircraft structures", link: "https://www.youtube.com/results?search_query=Goodwill+Gate2IIT+GATE+Aerospace" },
+        { name: "GATE Aerospace – IGC", desc: "GATE AE crash courses, aerodynamics, paper discussions", link: "https://www.youtube.com/results?search_query=GATE+Aerospace+IGC" },
+        { name: "Goodwill Gate2IIT – GATE Aerospace", desc: "Full AE lecture series, aircraft structures, PYQs", link: "https://www.youtube.com/results?search_query=Goodwill+Gate2IIT+GATE+Aerospace" },
         { name: "ACE Engineering Academy", desc: "General GATE strategy + some AE support", link: "https://www.youtube.com/results?search_query=ACE+Engineering+Academy+GATE+Aerospace" },
-        { name: "GATE Academy", desc: "Maths/aptitude for AE", link: "https://www.youtube.com/results?search_query=GATE+Academy+Aerospace" }
+        { name: "GATE Academy", desc: "General GATE; useful for maths/aptitude for AE", link: "https://www.youtube.com/results?search_query=GATE+Academy+Aerospace" }
     ],
     PI: [
-        { name: "GATE Wallah", desc: "Mechanics, manufacturing, industrial topics; one‑shots", link: "https://www.youtube.com/results?search_query=GATE+Wallah+Production+Industrial+One+Shot" },
-        { name: "Exergic", desc: "Strong ME/production concepts", link: "https://www.youtube.com/results?search_query=Exergic+GATE+Production" },
+        { name: "GATE Wallah – ME, CE, XE, CH, PI & ES", desc: "Mechanics, manufacturing, industrial topics; many one‑shots", link: "https://www.youtube.com/results?search_query=GATE+Wallah+Production+Industrial+One+Shot" },
+        { name: "Exergic – GATE ME, XE", desc: "Strong ME/production concepts and problem practice", link: "https://www.youtube.com/results?search_query=Exergic+GATE+Production" },
         { name: "ACE Engineering Academy", desc: "General GATE with relevant ME/PI theory", link: "https://www.youtube.com/results?search_query=ACE+Engineering+Academy+GATE+PI" },
-        { name: "BYJU’S Exam Prep", desc: "CE, ME & XE content useful for PI", link: "https://www.youtube.com/results?search_query=BYJUS+Exam+Prep+GATE+PI" }
+        { name: "BYJU’S Exam Prep GATE & ESE", desc: "CE, ME & XE content useful for PI core topics", link: "https://www.youtube.com/results?search_query=BYJUS+Exam+Prep+GATE+PI" }
     ],
     ME: [
-        { name: "Exergic", desc: "Detailed course + revision/problem videos", link: "https://www.youtube.com/results?search_query=Exergic+GATE+Mechanical+One+Shot" },
-        { name: "GATE Wallah", desc: "ME subject marathons and one‑shots", link: "https://www.youtube.com/results?search_query=GATE+Wallah+Mechanical+One+Shot" },
-        { name: "BYJU’S Exam Prep", desc: "Crash courses & marathons", link: "https://www.youtube.com/results?search_query=BYJUS+Exam+Prep+GATE+Mechanical" },
-        { name: "ACE Engineering Academy", desc: "Strategy, subject marathons", link: "https://www.youtube.com/results?search_query=ACE+Engineering+Academy+GATE+Mechanical" }
+        { name: "Exergic – GATE ME, XE", desc: "Leader for ME; detailed course + many revision/problem videos", link: "https://www.youtube.com/results?search_query=Exergic+GATE+Mechanical+One+Shot" },
+        { name: "GATE Wallah – ME, CE, XE & CH", desc: "ME subject marathons and one‑shot maths", link: "https://www.youtube.com/results?search_query=GATE+Wallah+Mechanical+One+Shot" },
+        { name: "BYJU’S Exam Prep GATE & ESE", desc: "Crash courses & marathons", link: "https://www.youtube.com/results?search_query=BYJUS+Exam+Prep+GATE+Mechanical" },
+        { name: "ACE Engineering Academy", desc: "Strategy, subject marathons, guidance", link: "https://www.youtube.com/results?search_query=ACE+Engineering+Academy+GATE+Mechanical" }
     ],
     PH: [
-        { name: "Physics Wallah", desc: "GATE/JAM physics marathons and topic one‑shots", link: "https://www.youtube.com/results?search_query=Physics+Wallah+GATE+Physics" },
-        { name: "PW IIT JAM & CSIR NET", desc: "Dedicated higher‑physics competitive channel", link: "https://www.youtube.com/results?search_query=PW+IIT+JAM+CSIR+NET+Physics" },
-        { name: "IFAS Physics", desc: "Systematic GATE/JEST/NET physics prep", link: "https://www.youtube.com/results?search_query=IFAS+Physics+GATE" }
+        { name: "Physics Wallah – Alakh Pandey (PW)", desc: "GATE/JAM physics marathons and topic one‑shots", link: "https://www.youtube.com/results?search_query=Physics+Wallah+GATE+Physics" },
+        { name: "PW IIT JAM & CSIR NET", desc: "PW’s dedicated higher‑physics competitive channel; JAM/NET but highly relevant to GATE PH", link: "https://www.youtube.com/results?search_query=PW+IIT+JAM+CSIR+NET+Physics" },
+        { name: "Physics – CSIR NET, GATE & JEST: IFAS", desc: "Systematic GATE/JEST/NET physics prep", link: "https://www.youtube.com/results?search_query=IFAS+Physics+GATE" }
     ],
     ES: [
-        { name: "GATE Wallah", desc: "Thermo/heat transfer/fluids marathons", link: "https://www.youtube.com/results?search_query=GATE+Wallah+Energy+Science" },
-        { name: "Exergic", desc: "Strong thermo, heat transfer, power plant", link: "https://www.youtube.com/results?search_query=Exergic+GATE+Energy+Science" },
-        { name: "Engineers Institute (Eii)", desc: "Thermo, transport, CRE useful for ES", link: "https://www.youtube.com/results?search_query=Engineers+Institute+of+India+Chemical" },
+        { name: "GATE Wallah – ME, CE, XE, CH, PI & ES", desc: "Explicitly lists ES; thermo/heat transfer/fluids marathons", link: "https://www.youtube.com/results?search_query=GATE+Wallah+Energy+Science" },
+        { name: "Exergic – GATE ME, XE", desc: "Strong thermo, heat transfer, power plant; very useful for ES", link: "https://www.youtube.com/results?search_query=Exergic+GATE+Energy+Science" },
+        { name: "Engineers Institute (Eii) – Chemical Engineering", desc: "Thermo, transport, CRE useful for ES", link: "https://www.youtube.com/results?search_query=Engineers+Institute+of+India+Chemical" },
         { name: "ACE Engineering Academy", desc: "Maths/aptitude + some ES‑relevant content", link: "https://www.youtube.com/results?search_query=ACE+Engineering+Academy+GATE+ES" }
     ],
     ST: [
-        { name: "Mathstats", desc: "Full GATE ST PYQ solutions & classes", link: "https://www.youtube.com/results?search_query=Mathstats+GATE+Statistics" },
-        { name: "GATE Wallah", desc: "Engineering Mathematics one‑shots", link: "https://www.youtube.com/results?search_query=GATE+Wallah+Engineering+Mathematics+Probability" },
+        { name: "Mathstats: IIT‑JAM, GATE, NET, CUET, ISI", desc: "Full GATE ST PYQ solutions & classes", link: "https://www.youtube.com/results?search_query=Mathstats+GATE+Statistics" },
+        { name: "Mathstats channel GATE Statistics series", desc: "Live GATE ST 2022–2026 batches", link: "https://www.youtube.com/results?search_query=Mathstats+GATE+Statistics+Series" },
+        { name: "GATE Wallah – Engineering Mathematics", desc: "One‑shots (probability & stats core for ST maths part)", link: "https://www.youtube.com/results?search_query=GATE+Wallah+Engineering+Mathematics+Probability" },
         { name: "GeeksforGeeks GATE", desc: "Probability/stats content in DA/CS playlists", link: "https://www.youtube.com/results?search_query=GeeksforGeeks+GATE+Statistics" }
     ],
     EC: [
-        { name: "GATE Wallah", desc: "Branch‑wise playlists + one‑shot maths", link: "https://www.youtube.com/results?search_query=GATE+Wallah+ECE+One+Shot" },
-        { name: "GeeksforGeeks", desc: "Targeted EE/EC/IN GATE content", link: "https://www.youtube.com/results?search_query=GeeksforGeeks+GATE+ECE" },
-        { name: "BYJU’S Exam Prep", desc: "Marathons, crash courses", link: "https://www.youtube.com/results?search_query=BYJUS+Exam+Prep+GATE+ECE" },
-        { name: "Kreatryx GATE", desc: "DPP discussions, signals, networks", link: "https://www.youtube.com/results?search_query=Kreatryx+GATE+ECE" }
+        { name: "GATE Wallah – EC, EE & CS", desc: "Branch‑wise playlists + one‑shot maths and core subjects", link: "https://www.youtube.com/results?search_query=GATE+Wallah+ECE+One+Shot" },
+        { name: "GeeksforGeeks – EC, EE & IN", desc: "Targeted EE/EC/IN GATE content", link: "https://www.youtube.com/results?search_query=GeeksforGeeks+GATE+ECE" },
+        { name: "BYJU’S Exam Prep GATE & ESE – EE, EC, IN, CS", desc: "Marathons, crash courses", link: "https://www.youtube.com/results?search_query=BYJUS+Exam+Prep+GATE+ECE" },
+        { name: "Kreatryx GATE – EE, ECE & IN", desc: "DPP discussions, signals, networks, etc.", link: "https://www.youtube.com/results?search_query=Kreatryx+GATE+ECE" }
     ],
     CE: [
-        { name: "GATE Wallah", desc: "SOM, FM, structures one‑shots", link: "https://www.youtube.com/results?search_query=GATE+Wallah+Civil+One+Shot" },
-        { name: "GATE Academy", desc: "Subject‑wise CE lectures & revisions", link: "https://www.youtube.com/results?search_query=GATE+Academy+Civil" },
-        { name: "BYJU’S Exam Prep", desc: "CE‑oriented marathons: FM, soil, environment", link: "https://www.youtube.com/results?search_query=BYJUS+Exam+Prep+GATE+Civil" },
+        { name: "GATE Wallah – ME, CE, XE & CH", desc: "Strength of materials, FM, structures one‑shots", link: "https://www.youtube.com/results?search_query=GATE+Wallah+Civil+One+Shot" },
+        { name: "GATE Academy by Umesh Dhande", desc: "Subject‑wise CE lectures & revisions", link: "https://www.youtube.com/results?search_query=GATE+Academy+Civil" },
+        { name: "BYJU’S Exam Prep GATE & ESE – CE, ME & XE", desc: "CE‑oriented marathons: FM, soil, environment", link: "https://www.youtube.com/results?search_query=BYJUS+Exam+Prep+GATE+Civil" },
         { name: "GATE Adda247", desc: "Steel structures, RCC, other CE topics", link: "https://www.youtube.com/results?search_query=GATE+Adda247+Civil" }
     ],
     BM: [
-        { name: "Kalams & Krishnans", desc: "GATE BM strategy, simplified revision", link: "https://www.youtube.com/results?search_query=Kalams+Krishnans+Biomedical" },
-        { name: "Biomed Bro", desc: "Syllabus breakdown, important topics", link: "https://www.youtube.com/results?search_query=Biomed+Bro+GATE" },
-        { name: "FindMyTest", desc: "GATE Biomedical / MT live classes", link: "https://www.youtube.com/results?search_query=FindMyTest+GATE+Biomedical" }
+        { name: "Kalams & Krishnans Biomedical", desc: "GATE BM strategy, simplified revision series", link: "https://www.youtube.com/results?search_query=Kalams+Krishnans+Biomedical" },
+        { name: "Biomed Bro", desc: "Syllabus breakdown, important topics, strategy for GATE BM", link: "https://www.youtube.com/results?search_query=Biomed+Bro+GATE" },
+        { name: "FindMyTest", desc: "GATE Biomedical / MT live classes and test‑oriented sessions", link: "https://www.youtube.com/results?search_query=FindMyTest+GATE+Biomedical" }
     ],
     MA: [
-        { name: "IFAS Mathematics", desc: "Explicit GATE Mathematics strategy", link: "https://www.youtube.com/results?search_query=IFAS+Mathematics+GATE" },
-        { name: "tripBohemia", desc: "GATE MA full course overview & resources", link: "https://www.youtube.com/results?search_query=tripBohemia+GATE+Maths" },
-        { name: "Pure Mathematical Academy", desc: "GATE MA PYQs", link: "https://www.youtube.com/results?search_query=Pure+Mathematical+Academy+GATE" },
-        { name: "GATE Wallah", desc: "Engg Maths one‑shots", link: "https://www.youtube.com/results?search_query=GATE+Wallah+Engineering+Mathematics" }
+        { name: "Mathematics – CSIR NET, GATE, SET & NBHM: IFAS", desc: "Explicit GATE Mathematics strategy and prep", link: "https://www.youtube.com/results?search_query=IFAS+Mathematics+GATE" },
+        { name: "tripBohemia Maths by Ishika", desc: "GATE MA full course overview & resources", link: "https://www.youtube.com/results?search_query=tripBohemia+GATE+Maths" },
+        { name: "Pure Mathematical Academy", desc: "GATE MA PYQs, e.g., LPP 2020–24", link: "https://www.youtube.com/results?search_query=Pure+Mathematical+Academy+GATE" },
+        { name: "GATE Wallah – Engineering Mathematics", desc: "One‑shots useful for MA basics & methods", link: "https://www.youtube.com/results?search_query=GATE+Wallah+Engineering+Mathematics" }
     ],
     DA: [
-        { name: "GoClasses", desc: "GATE DA Data Science & AI full course", link: "https://www.youtube.com/results?search_query=GoClasses+GATE+DA" },
-        { name: "GeeksforGeeks GATE", desc: "GATE DA database & warehousing practice", link: "https://www.youtube.com/results?search_query=GeeksforGeeks+GATE+DA" },
-        { name: "Mathstats", desc: "DA + statistics perspective", link: "https://www.youtube.com/results?search_query=Mathstats+GATE+DA" },
-        { name: "GATE DA analysis", desc: "Paper analysis & trends", link: "https://www.youtube.com/results?search_query=GATE+DA+analysis+channel" }
+        { name: "GoClasses – GATE DA Course", desc: "GATE DA Data Science & AI full course channel", link: "https://www.youtube.com/results?search_query=GoClasses+GATE+DA" },
+        { name: "GeeksforGeeks GATE", desc: "GATE DA database & warehousing practice sessions", link: "https://www.youtube.com/results?search_query=GeeksforGeeks+GATE+DA" },
+        { name: "Mathstats", desc: "GATE DA 2026 batch (DA + statistics perspective)", link: "https://www.youtube.com/results?search_query=Mathstats+GATE+DA" },
+        { name: "GATE DA analysis channel", desc: "GATE DA 2024/25 paper analysis & trends", link: "https://www.youtube.com/results?search_query=GATE+DA+analysis+channel" }
     ],
     CS: [
-        { name: "Gate Smashers", desc: "Complete GATE CSE syllabus + PYQs", link: "https://www.youtube.com/results?search_query=Gate+Smashers+GATE+CSE" },
+        { name: "Gate Smashers", desc: "Complete GATE CSE syllabus + PYQs, very popular", link: "https://www.youtube.com/results?search_query=Gate+Smashers+GATE+CSE" },
         { name: "GeeksforGeeks GATE", desc: "CSE + DA content, practice sessions", link: "https://www.youtube.com/results?search_query=GeeksforGeeks+GATE+CSE" },
-        { name: "BYJU’S Exam Prep", desc: "CSE marathons & crash courses", link: "https://www.youtube.com/results?search_query=BYJUS+Exam+Prep+GATE+CSE" },
-        { name: "GATE Wallah", desc: "CS playlists + one‑shot maths", link: "https://www.youtube.com/results?search_query=GATE+Wallah+CSE+One+Shot" }
+        { name: "BYJU’S Exam Prep GATE & ESE", desc: "CSE marathons & crash courses", link: "https://www.youtube.com/results?search_query=BYJUS+Exam+Prep+GATE+CSE" },
+        { name: "GATE Wallah – EC, EE & CS", desc: "CS playlists + one‑shot maths", link: "https://www.youtube.com/results?search_query=GATE+Wallah+CSE+One+Shot" }
     ],
     AG: [
-        { name: "GATEFORALL", desc: "AG‑specific course (farm power, machinery)", link: "https://www.youtube.com/results?search_query=GATEFORALL+GATE+AG" },
-        { name: "AGRIYUG", desc: "Orientation + crash course playlists", link: "https://www.youtube.com/results?search_query=AGRIYUG+GATE+Agriculture" }
+        { name: "GATEFORALL – GATE AG", desc: "AG‑specific course with farm power, machinery, hydrology, etc.", link: "https://www.youtube.com/results?search_query=GATEFORALL+GATE+AG" },
+        { name: "AGRIYUG – GATE AGRICULTURE ENGINEERING", desc: "Orientation + crash course playlists", link: "https://www.youtube.com/results?search_query=AGRIYUG+GATE+Agriculture" }
     ],
     BT: [
-        { name: "Instant Biology", desc: "GATE BT crash course & strategy", link: "https://www.youtube.com/results?search_query=Instant+Biology+Dr+Neelabh+GATE+BT" },
-        { name: "PW IIT JAM", desc: "Biotech/XL/BT‑oriented courses", link: "https://www.youtube.com/results?search_query=PW+IIT+JAM+Biotech" },
-        { name: "CSIR NET Adda247", desc: "GATE BT planning & study plan", link: "https://www.youtube.com/results?search_query=CSIR+NET+Adda247+GATE+BT" }
+        { name: "Instant Biology by Dr. Neelabh", desc: "GATE BT crash course & strategy", link: "https://www.youtube.com/results?search_query=Instant+Biology+Dr+Neelabh+GATE+BT" },
+        { name: "PW IIT JAM & CSIR NET", desc: "Biotech/XL/BT‑oriented courses helpful for GATE BT", link: "https://www.youtube.com/results?search_query=PW+IIT+JAM+Biotech" },
+        { name: "CSIR NET Adda247 – BT playlists", desc: "GATE BT 2026 batch planning & study plan", link: "https://www.youtube.com/results?search_query=CSIR+NET+Adda247+GATE+BT" }
     ],
     EE: [
-        { name: "GATE Wallah", desc: "Machines, power systems, control one‑shots", link: "https://www.youtube.com/results?search_query=GATE+Wallah+Electrical+One+Shot" },
-        { name: "GeeksforGeeks", desc: "EE‑specific GATE batches & guidance", link: "https://www.youtube.com/results?search_query=GeeksforGeeks+GATE+EE" },
-        { name: "BYJU’S Exam Prep", desc: "EE marathons, crash courses, PYQs", link: "https://www.youtube.com/results?search_query=BYJUS+Exam+Prep+GATE+EE" },
+        { name: "GATE Wallah – EE, EC & CS", desc: "Electrical machines, power systems, control one‑shots", link: "https://www.youtube.com/results?search_query=GATE+Wallah+Electrical+One+Shot" },
+        { name: "GeeksforGeeks – EC, EE & IN", desc: "EE‑specific GATE batches & guidance", link: "https://www.youtube.com/results?search_query=GeeksforGeeks+GATE+EE" },
+        { name: "BYJU’S Exam Prep GATE & ESE – EE, EC, IN, CS", desc: "EE marathons, crash courses, PYQs", link: "https://www.youtube.com/results?search_query=BYJUS+Exam+Prep+GATE+EE" },
         { name: "ACE Engineering Academy", desc: "EE strategy and subject deep dives", link: "https://www.youtube.com/results?search_query=ACE+Engineering+Academy+GATE+EE" }
     ],
     CH: [
         { name: "GATE Chemical Engineering", desc: "Dedicated chemical GATE channel", link: "https://www.youtube.com/results?search_query=GATE+Chemical+Engineering" },
-        { name: "Learn CHE", desc: "CHE concepts from scratch", link: "https://www.youtube.com/results?search_query=Learn+CHE+GATE" },
-        { name: "Engineers Institute (Eii)", desc: "Online live GATE CH classes", link: "https://www.youtube.com/results?search_query=Engineers+Institute+of+India+Chemical" },
-        { name: "GATE Wallah", desc: "CH‑labelled playlists + maths", link: "https://www.youtube.com/results?search_query=GATE+Wallah+Chemical" }
+        { name: "Learn CHE", desc: "CHE concepts from scratch with GATE focus", link: "https://www.youtube.com/results?search_query=Learn+CHE+GATE" },
+        { name: "Engineers Institute of India (Eii) – Chemical", desc: "Online live GATE CH classes", link: "https://www.youtube.com/results?search_query=Engineers+Institute+of+India+Chemical" },
+        { name: "GATE Wallah – ME, CE, XE & CH", desc: "CH‑labelled playlists + maths", link: "https://www.youtube.com/results?search_query=GATE+Wallah+Chemical" }
     ],
     AR: [
-        { name: "KP Classes", desc: "AR crash courses, PYQs", link: "https://www.youtube.com/results?search_query=KP+Classes+GATE+Architecture" },
-        { name: "Aekam Academy", desc: "URDPFI/urban planning series", link: "https://www.youtube.com/results?search_query=Aekam+Academy+GATE+Architecture" }
+        { name: "KP Classes for GATE Architecture & Planning", desc: "AR crash courses, PYQs, topper talks", link: "https://www.youtube.com/results?search_query=KP+Classes+GATE+Architecture" },
+        { name: "Aekam Academy", desc: "URDPFI/urban planning series for GATE AR", link: "https://www.youtube.com/results?search_query=Aekam+Academy+GATE+Architecture" },
+        { name: "KP GATE Classes main channel", desc: "Broader AR & planning content", link: "https://www.youtube.com/results?search_query=KP+GATE+Classes" }
     ],
     XE: [
-        { name: "Exergic", desc: "XE‑A/B: ME‑linked subjects", link: "https://www.youtube.com/results?search_query=Exergic+GATE+XE" },
-        { name: "Endurance Engg Academy", desc: "XE‑A,B,D,E courses & guidance", link: "https://www.youtube.com/results?search_query=Endurance+Engineering+Academy+GATE+XE" },
-        { name: "GATE Wallah", desc: "XE‑oriented content & engg maths", link: "https://www.youtube.com/results?search_query=GATE+Wallah+XE" },
+        { name: "Exergic – GATE ME, XE", desc: "XE‑A/B: ME‑linked subjects, strong problem solving", link: "https://www.youtube.com/results?search_query=Exergic+GATE+XE" },
+        { name: "Endurance Engineering Academy (EEA) – GATE XE", desc: "XE‑A,B,D,E courses & guidance", link: "https://www.youtube.com/results?search_query=Endurance+Engineering+Academy+GATE+XE" },
+        { name: "GATE Wallah – ME, CE, XE & CH", desc: "XE‑oriented content & engg maths", link: "https://www.youtube.com/results?search_query=GATE+Wallah+XE" },
         { name: "ACE Engineering Academy", desc: "XE prep strategy and maths/aptitude", link: "https://www.youtube.com/results?search_query=ACE+Engineering+Academy+GATE+XE" }
     ],
     MT: [
         { name: "Metalogical Engineering", desc: "GATE MT syllabus + topic explanations", link: "https://www.youtube.com/results?search_query=Metalogical+Engineering+GATE+MT" },
-        { name: "FindMyTest", desc: "Live MT classes & tests", link: "https://www.youtube.com/results?search_query=FindMyTest+GATE+Metallurgical" }
+        { name: "FindMyTest – GATE Metallurgical Engineering", desc: "Live MT classes & tests", link: "https://www.youtube.com/results?search_query=FindMyTest+GATE+Metallurgical" }
     ]
 };
 
@@ -2638,6 +2705,9 @@ const App = () => {
     const [isPersonalPanelOpen, setPersonalPanelOpen] = useState(false);
     const [isSelfDevOpen, setSelfDevOpen] = useState(false);
     const [hasSetTarget, setHasSetTarget] = useState(false);
+    // New state for guest target tracking
+    const [guestTarget, setGuestTarget] = useState<string | null>(null);
+
     const [theme, setTheme] = useState<'light' | 'dark'>(() => {
         try {
             const stored = localStorage.getItem('theme');
@@ -2667,6 +2737,25 @@ const App = () => {
     useEffect(() => {
         if (isPersonalPanelOpen) setLocalApiKeyInput(apiKey || '');
     }, [isPersonalPanelOpen, apiKey]);
+
+    // Load guest target on login
+    useEffect(() => {
+        if (currentUser && userRole === 'public') {
+            const stored = localStorage.getItem(`guest_target_${currentUser.email}`);
+            setGuestTarget(stored);
+        } else {
+            setGuestTarget(null);
+        }
+    }, [currentUser, userRole]);
+
+    const handleSetGuestTarget = (profId: string) => {
+        if (userRole === 'public' && currentUser) {
+            setGuestTarget(profId);
+            localStorage.setItem(`guest_target_${currentUser.email}`, profId);
+            showToast("Target professor set! 'Mine' dashboard unlocked.");
+        }
+        setHasSetTarget(true); // For animation/flow
+    };
 
     // Helpers
     const togglePersonalPanel = () => setPersonalPanelOpen(p => !p);
@@ -2893,18 +2982,17 @@ const App = () => {
     };
 
     const handlePublicLogin = async (name: string, email: string, pass: string): Promise<boolean> => {
-        if (pass === '12345') {
-            setUserRole('public');
-            setCurrentUser({ name: name, email: email, role: 'Student' });
-            return true;
-        }
-        return false;
+        // Authenticated inside LoginPage
+        setUserRole('public');
+        setCurrentUser({ name: name, email: email, role: 'Student' });
+        return true;
     };
 
     const handleLogout = () => {
         try { logout().catch(() => {}); } catch (e) {}
         setUserRole(null);
         setCurrentUser(null);
+        setGuestTarget(null);
         setViewStack([{ view: 'home' }]);
     };
 
@@ -2917,7 +3005,17 @@ const App = () => {
         switch (currentView.view) {
             case 'professor':
                 const prof = (Object.values(data.professors) as Professor[]).find(p => p.id === currentView.id) || data.professors[currentView.id];
-                return prof ? <ProfessorProfilePage professor={prof} onEditProfessor={handleEditInitiate} userRole={userRole} onSetTarget={(id?: string) => setHasSetTarget(true)} onReturnHome={() => setViewStack([{ view: 'home' }])} /> : <div>Professor not found.</div>;
+                return prof ? (
+                    <ProfessorProfilePage 
+                        professor={prof} 
+                        onEditProfessor={handleEditInitiate} 
+                        userRole={userRole} 
+                        onSetTarget={handleSetGuestTarget}
+                        onReturnHome={() => setViewStack([{ view: 'home' }])}
+                        hasGuestTarget={!!guestTarget}
+                        onConfirmGuestTarget={handleSetGuestTarget}
+                    /> 
+                ) : <div>Professor not found.</div>;
             case 'department':
                  const dept = data.departments.find(d => d.id === currentView.id);
                  return dept ? <DepartmentPage department={dept} allData={data} onNavigate={navigateTo} onRemoveProf={handleRemoveProfessor} onEditProf={handleEditInitiate} userRole={userRole} /> : <div>Department not found.</div>;
@@ -2925,7 +3023,14 @@ const App = () => {
                 return <ProfessorDirectoryPage professors={data.professors} onNavigate={navigateTo} onAdd={() => setActiveModal('add-professor')} userRole={userRole} onEdit={handleEditInitiate} onRemove={handleRemoveProfessor} />;
             case 'home':
             default:
-                return <HomePage data={data} onOpenPublicModal={(name: string) => setActiveModal(name)} />;
+                return (
+                    <HomePage 
+                        data={data} 
+                        onOpenPublicModal={(name: string) => setActiveModal(name)} 
+                        userRole={userRole} 
+                        hasGuestTarget={!!guestTarget} 
+                    />
+                );
         }
     };
 
