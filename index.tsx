@@ -1,16 +1,3 @@
-// Fix for Vite env typing
-interface ImportMeta {
-    readonly env: {
-        VITE_BACKEND_URL: string;
-    };
-}
-// Minimal HomePage component to fix build error
-const HomePage = ({ data, onOpenPublicModal }: { data: any, onOpenPublicModal: (name: string) => void }) => (
-    <div>
-        <h1>Home</h1>
-        {/* Add your homepage UI here */}
-    </div>
-);
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -881,9 +868,6 @@ const ProjectSearchWidget = ({ defaultQuery }: { defaultQuery?: string }) => {
     };
 
     const handleSubmit = (e?: React.FormEvent) => {
-
-
-
         e?.preventDefault();
         if (!query.trim()) return setError('Enter a project idea');
         performSearch(query.trim());
@@ -905,7 +889,7 @@ const ProjectSearchWidget = ({ defaultQuery }: { defaultQuery?: string }) => {
 
             <div className="github-user-cards">
                 {Object.keys(users).length === 0 && !loading && <div style={{color:'#666'}}>No users found yet. Try a broader query.</div>}
-                {Object.entries(users).map(([user, data]: [string, { avatar?: string; profile?: string; bio?: string; repos: { name: string; url: string; snippet?: string }[] }]) => (
+                {Object.entries(users).map(([user, data]: [string, any]) => (
                     <div key={user} className="github-user-card">
                         <div className="github-user-avatar"><img src={data.avatar} alt={user} style={{width:'100%', height:'100%', objectFit:'cover'}}/></div>
                         <div className="github-user-meta">
@@ -923,6 +907,94 @@ const ProjectSearchWidget = ({ defaultQuery }: { defaultQuery?: string }) => {
                     </div>
                 ))}
             </div>
+        </div>
+    );
+};
+
+const HomePage = ({ data, onOpenPublicModal }: { data: AppData, onOpenPublicModal?: (name: string) => void }) => {
+    // Replaced useLiveNews with PublicJobSearch for Public tab
+    const [homeTab, setHomeTab] = useState<'PUBLIC' | 'MINE'>('PUBLIC');
+    const [mineSubTab, setMineSubTab] = useState<'news' | 'projects'>('news');
+
+    // Mock data for mine section (kept for fallback)
+    const personalNews = [
+        { title: 'Application Update: Dr. Grant', detail: 'Pending review' },
+        { title: 'New Message from Career Center', detail: 'Workshop invite' }
+    ];
+    const projectIdeas = [
+        { title: 'AI in Healthcare', detail: 'Collaborate with Bio Dept' },
+        { title: 'Sustainable Energy Grid', detail: 'Review physics notes' }
+    ];
+
+    return (
+        <div className="homepage-container">
+            <div className="homepage-tabs">
+                <button className={`home-tab ${homeTab === 'PUBLIC' ? 'active' : ''}`} onClick={() => setHomeTab('PUBLIC')}>PUBLIC</button>
+                <button className={`home-tab ${homeTab === 'MINE' ? 'active' : ''}`} onClick={() => setHomeTab('MINE')}>MINE</button>
+            </div>
+            {homeTab === 'PUBLIC' ? (
+                // PUBLIC preview: show stacked ANNOUNCEMENTS and NEWS with a 2-item preview
+                <div style={{display:'flex', flexDirection:'column', gap:'1rem'}}>
+                    <div className="public-section-card" style={{padding:'1rem', borderRadius:8, boxShadow:'0 2px 8px rgba(0,0,0,0.06)', background:'white'}}>
+                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                            <div>
+                                <h3 style={{margin:0}}>ANNOUNCEMENTS</h3>
+                                <p style={{margin:0, color:'#666', fontSize:'0.9rem'}}>Latest job announcements across companies</p>
+                            </div>
+                            <div style={{display:'flex', gap:8}}>
+                                <button className="add-btn" onClick={() => onOpenPublicModal && onOpenPublicModal('announcements')}>Open</button>
+                            </div>
+                        </div>
+                        <div style={{marginTop:'0.75rem'}}>
+                            <PublicJobSearch mode="preview" previewCount={2} />
+                        </div>
+                    </div>
+
+                    <div className="public-section-card" style={{padding:'1rem', borderRadius:8, boxShadow:'0 2px 8px rgba(0,0,0,0.06)', background:'white'}}>
+                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                            <div>
+                                <h3 style={{margin:0}}>NEWS</h3>
+                                <p style={{margin:0, color:'#666', fontSize:'0.9rem'}}>Technology news and updates</p>
+                            </div>
+                            <div style={{display:'flex', gap:8}}>
+                                <button className="add-btn" onClick={() => onOpenPublicModal && onOpenPublicModal('news')}>Open</button>
+                            </div>
+                        </div>
+                        <div style={{marginTop:'0.75rem'}}>
+                            {/* show a small news preview using the same component in preview mode (it will run a news query) */}
+                            <PublicJobSearch mode="preview" previewCount={2} queryTarget={'news'} />
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="mine-dashboard-wrapper">
+                    <div className="mine-nav-container">
+                        <button
+                            className={`mine-nav-tab ${mineSubTab === 'news' ? 'active' : ''}`}
+                            onClick={() => setMineSubTab('news')}
+                        >
+                            News
+                        </button>
+                        <button
+                            className={`mine-nav-tab ${mineSubTab === 'projects' ? 'active' : ''}`}
+                            onClick={() => setMineSubTab('projects')}
+                        >
+                            Projects
+                        </button>
+                    </div>
+
+                    <div className="mine-content-feed">
+                        {mineSubTab === 'news' ? (
+                            // Render CompanyNewsWidget which allows entering a company name and fetching
+                            // official news using Google Custom Search API restricted to authoritative domains.
+                            <CompanyNewsWidget />
+                        ) : (
+                            // Render ProjectSearchWidget for finding GitHub projects/contributors for ideas
+                            <ProjectSearchWidget />
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -1860,7 +1932,7 @@ const CertificatesModal = ({ onClose }: { onClose: () => void }) => {
                                         </div>
                                         <h3 className="cert-card-title">{cert.name}</h3>
                                         <div className="cert-card-footer">
-                                            <span className="open-icon">Watch Videos ↗</span>
+                                            <span className="open-icon">Visit Course ↗</span>
                                         </div>
                                     </a>
                                 ))}
@@ -2053,20 +2125,19 @@ const PDFViewer = ({ code }: { code: string }) => {
             // Support two common layouts:
             // 1) per-code folders: /syllabus/AE/AE_2026_Syllabus.pdf
             // 2) single syllabus folder with files named by code: /syllabus/AE_2026_Syllabus.pdf
-            const backend = import.meta.env.VITE_BACKEND_URL || 'https://lol-j8ni.onrender.com';
             const candidates = [
-                // single-folder filenames (served from backend)
-                `${backend}/syllabus/${code}_2026_Syllabus.pdf`,
-                `${backend}/syllabus/${code}_2025_Syllabus.pdf`,
-                `${backend}/syllabus/${code}_Syllabus.pdf`,
-                `${backend}/syllabus/${code}.pdf`,
-                `${backend}/syllabus/${code}_2026.pdf`,
+                // single-folder filenames (project-root or public/syllabus)
+                `${window.location.origin}/syllabus/${code}_2026_Syllabus.pdf`,
+                `${window.location.origin}/syllabus/${code}_2025_Syllabus.pdf`,
+                `${window.location.origin}/syllabus/${code}_Syllabus.pdf`,
+                `${window.location.origin}/syllabus/${code}.pdf`,
+                `${window.location.origin}/syllabus/${code}_2026.pdf`,
                 // per-code folder layout
-                `${backend}/syllabus/${code}/${code}_2026_Syllabus.pdf`,
-                `${backend}/syllabus/${code}/${code}_2025_Syllabus.pdf`,
-                `${backend}/syllabus/${code}/${code}_Syllabus.pdf`,
-                `${backend}/syllabus/${code}/${code}.pdf`,
-                `${backend}/syllabus/${code}/${code}_2026.pdf`
+                `${window.location.origin}/syllabus/${code}/${code}_2026_Syllabus.pdf`,
+                `${window.location.origin}/syllabus/${code}/${code}_2025_Syllabus.pdf`,
+                `${window.location.origin}/syllabus/${code}/${code}_Syllabus.pdf`,
+                `${window.location.origin}/syllabus/${code}/${code}.pdf`,
+                `${window.location.origin}/syllabus/${code}/${code}_2026.pdf`
             ];
 
             for (const url of candidates) {
@@ -2249,7 +2320,7 @@ const GATE_LECTURES: Record<string, Array<{ name: string; desc: string; link: st
 const QuizzesModal = ({ onClose }: { onClose: () => void }) => {
     const [activeTab, setActiveTab] = useState("Interviewer");
     const [selectedGateBranch, setSelectedGateBranch] = useState<any>(null);
-    const [gateSubTab, setGateSubTab] = useState<'Syllabus' | 'PYQs' | 'MATERIALS'>('Syllabus');
+    const [gateSubTab, setGateSubTab] = useState<'Syllabus' | 'PYQs' | 'Lectures'>('Syllabus');
 
     // Generic Quiz Data
     const quizData = [
@@ -2461,10 +2532,10 @@ const QuizzesModal = ({ onClose }: { onClose: () => void }) => {
                                         PYQs
                                     </button>
                                     <button 
-                                        className={`mine-nav-tab ${gateSubTab === 'MATERIALS' ? 'active' : ''}`}
-                                        onClick={() => setGateSubTab('MATERIALS')}
+                                        className={`mine-nav-tab ${gateSubTab === 'Lectures' ? 'active' : ''}`}
+                                        onClick={() => setGateSubTab('Lectures')}
                                     >
-                                        MATERIALS
+                                        Lectures
                                     </button>
                                 </div>
 
@@ -2473,18 +2544,15 @@ const QuizzesModal = ({ onClose }: { onClose: () => void }) => {
                                         // Embedded PDF viewer (loads syllabus from /syllabus/<code>/)
                                         <PDFViewer code={selectedGateBranch.code} />
                                     ) : (
-                                        <>
-                                            {gateSubTab === 'PYQs' ? (
-                                                <div>
-                                                    <p style={{color:'#666'}}>Previous Year Questions for {selectedGateBranch.name}.</p>
-                                                    <PYQList code={selectedGateBranch.code} />
-                                                </div>
-                                            ) : (
-                                                <div>
-                                                    <h2 style={{marginBottom:'1.2rem'}}><strong>Materials</strong></h2>
-                                                    <div style={{marginBottom:'2rem'}}>
-                                                        <h3><strong>Lectures</strong></h3>
-                                                        <p style={{color:'#666', marginBottom:'1.5rem'}}><strong><em>{`Recommended video lectures and channels for ${selectedGateBranch.name}.`}</em></strong></p>
+                                            <>
+                                                {gateSubTab === 'PYQs' ? (
+                                                    <div>
+                                                        <p style={{color:'#666'}}>Previous Year Questions for {selectedGateBranch.name}.</p>
+                                                        <PYQList code={selectedGateBranch.code} />
+                                                    </div>
+                                                ) : (
+                                                    <div>
+                                                        <p style={{color:'#666', marginBottom:'1.5rem'}}>{`Recommended video lectures and channels for ${selectedGateBranch.name}.`}</p>
                                                         {GATE_LECTURES[selectedGateBranch.code] ? (
                                                             <div className="cert-provider-grid">
                                                                 {GATE_LECTURES[selectedGateBranch.code].map((lecture, idx) => (
@@ -2492,8 +2560,8 @@ const QuizzesModal = ({ onClose }: { onClose: () => void }) => {
                                                                         <div className="cert-card-top">
                                                                             <span className="cert-cat-badge">YouTube</span>
                                                                         </div>
-                                                                        <h3 className="cert-card-title"><strong><em>{lecture.name}</em></strong></h3>
-                                                                        <p style={{fontSize:'0.85rem', color:'#666', margin:'0 0 1rem 0'}}><strong><em>{lecture.desc}</em></strong></p>
+                                                                        <h3 className="cert-card-title">{lecture.name}</h3>
+                                                                        <p style={{fontSize:'0.85rem', color:'#666', margin:'0 0 1rem 0'}}>{lecture.desc}</p>
                                                                         <div className="cert-card-footer">
                                                                             <span className="open-icon">Watch Videos ↗</span>
                                                                         </div>
@@ -2506,14 +2574,9 @@ const QuizzesModal = ({ onClose }: { onClose: () => void }) => {
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <div>
-                                                        <h3><strong>Books</strong></h3>
-                                                        <p style={{color:'#888', fontStyle:'italic'}}>Books and reference materials will be listed here soon.</p>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
+                                                )}
+                                            </>
+                                        )}
                                 </div>
                             </div>
                         ) : (
@@ -2767,11 +2830,10 @@ const App = () => {
         try {
             // Try fetching from server
             const serverData: any = await fetchMockData();
-            if (serverData && serverData.departments && Array.isArray(serverData.departments) && serverData.departments.length > 0) {
+            if (serverData && serverData.departments) {
                 loadedData = serverData;
                 setApiStatus('connected');
             } else {
-                setApiStatus('offline');
                 throw new Error('Invalid server data');
             }
         } catch (error) {
