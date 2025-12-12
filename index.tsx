@@ -370,7 +370,7 @@ const SiteHeader = ({ onMenuClick, onBack, showBack, apiStatus, onLogout, userRo
         {/* Center: Branding (logo badge + title) */}
         <div className="center-branding" role="banner" onClick={onHomeClick} style={{cursor: 'pointer'}}>
             <span className="logo-badge" aria-hidden>
-                <img src={"/WhatsApp Image 2025-11-30 at 23.23.42_45a013bb.jpg"} alt="" className="logo-img" />
+                <img src={"/converted_image.png"} alt="" className="logo-img" />
             </span>
             <h1 className="site-title">Career Booster</h1>
         </div>
