@@ -234,7 +234,7 @@ const Chatbot = ({ userRole, apiKey }: { userRole?: 'admin' | 'public' | null, a
 
 // 2. Login Page
 const LoginPage = ({ onLogin, onPublicLogin, theme, onToggleTheme }: { onLogin: (email: string, pass: string) => boolean, onPublicLogin: (name: string, email: string, pass: string) => Promise<boolean>, theme?: 'light' | 'dark', onToggleTheme?: () => void }) => {
-    const [mode, setMode] = useState<'admin' | 'public'>('admin');
+    const [mode, setMode] = useState<'admin' | 'public'>('public');
     const [adminEmail, setAdminEmail] = useState('');
     const [adminPassword, setAdminPassword] = useState('');
     const [guestName, setGuestName] = useState('');
@@ -304,9 +304,9 @@ const LoginPage = ({ onLogin, onPublicLogin, theme, onToggleTheme }: { onLogin: 
                 <div className="login-form-area">
                     <div className="mode-toggle">
                         <div className="login-toggle">
-                            <button type="button" className={`toggle-option ${mode === 'admin' ? 'active' : ''}`} onClick={() => setMode('admin')}>Admin</button>
-                            <button type="button" className={`toggle-option ${mode === 'public' ? 'active' : ''}`} onClick={() => setMode('public')}>Guest</button>
-                        </div>
+                                <button type="button" className={`toggle-option ${mode === 'public' ? 'active' : ''}`} onClick={() => setMode('public')}>Guest</button>
+                                <button type="button" className={`toggle-option ${mode === 'admin' ? 'active' : ''}`} onClick={() => setMode('admin')}>Admin</button>
+                            </div>
                     </div>
 
                     {mode === 'admin' ? (
@@ -347,19 +347,19 @@ const LoginPage = ({ onLogin, onPublicLogin, theme, onToggleTheme }: { onLogin: 
                             <div className="input-group">
                                 <label>Name</label>
                                 <div className="input-wrapper">
-                                    <input type="text" value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Full Name (e.g. Mohi Modi)" />
+                                    <input type="text" value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Full Name " />
                                 </div>
                             </div>
                             <div className="input-group">
                                 <label>Email</label>
                                 <div className="input-wrapper">
-                                    <input type="email" value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)} placeholder="you@example.com" />
+                                    <input type="email" value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)} placeholder="email.com" />
                                 </div>
                             </div>
                             <div className="input-group">
                                 <label>Password</label>
                                 <div className="input-wrapper">
-                                    <input type="password" value={guestPassword} onChange={(e) => setGuestPassword(e.target.value)} placeholder="Firstname&123" />
+                                    <input type="password" value={guestPassword} onChange={(e) => setGuestPassword(e.target.value)} placeholder="admin password " />
                                 </div>
                             </div>
                             {error && <p className="login-error" style={{color: 'red'}}>{error}</p>}
@@ -393,8 +393,8 @@ const SiteHeader = ({ onMenuClick, onBack, showBack, apiStatus, onLogout, userRo
 
         {/* Center: Branding (logo badge + title) */}
         <div className="center-branding" role="banner" onClick={onHomeClick} style={{cursor: 'pointer'}}>
-            <span className="logo-badge" aria-hidden>
-                <img src={"/converted_image.png"} alt="" className="logo-img" />
+                <span className="logo-badge" aria-hidden>
+                <img src={"./converted_image.png"} alt="" className="logo-img" />
             </span>
             <h1 className="site-title">Career Booster</h1>
         </div>
@@ -2472,36 +2472,12 @@ const QuizzesModal = ({ onClose }: { onClose: () => void }) => {
                         }
                     }
                 } catch (e) {
-                    // manifest not present or failed — fall back to probing
-                }
-
-                // Probe reasonable year range for filenames like AE2013.pdf or AE2025.pdf
-                const years = Array.from({ length: 24 }, (_, i) => 2003 + i); // 2003..2026
-                const found: string[] = [];
-                // Probe both folder layout and single-folder layout
-                await Promise.all(years.map(async (yr) => {
-                    const candidates = [
-                        `${window.location.origin}/pyqs/${code}/${code}${yr}.pdf`,
-                        `${window.location.origin}/pyqs/${code}${code}${yr}.pdf`,
-                        `${window.location.origin}/pyqs/${code}${yr}.pdf`,
-                        `${window.location.origin}/pyqs/${code}${yr}.PDF`
-                    ];
-                    for (const url of candidates) {
-                        try {
-                            const h = await fetch(url, { method: 'HEAD' });
-                            if (h && h.ok) {
-                                if (mounted) found.push(url);
-                                break;
-                            }
-                        } catch (e) {
-                            // ignore
-                        }
+                    // manifest not present or failed — do not probe. Show no PYQs.
+                    if (mounted) {
+                        setFiles([]);
+                        setLoading(false);
                     }
-                }));
-
-                if (mounted) {
-                    setFiles(found);
-                    setLoading(false);
+                    return;
                 }
             };
             loadManifestOrProbe();
@@ -2973,7 +2949,10 @@ const App = () => {
     }, []);
 
     const handleLogin = (email: string, pass: string): boolean => {
-        if (email === '123' && pass === '123') {
+        // Admin credentials (updated)
+        const ADMIN_EMAIL = 'saurav.saha1984@gmail.com';
+        const ADMIN_PASSWORD = 'legends_reborn';
+        if (email === ADMIN_EMAIL && pass === ADMIN_PASSWORD) {
             setUserRole('admin');
             setCurrentUser({ name: 'Administrator', email: email || 'admin', role: 'System Admin' });
             return true;
